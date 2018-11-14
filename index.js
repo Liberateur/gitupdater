@@ -21,10 +21,10 @@ app.post('/', async function(req, res)
 		if(await childProcess.exec('git fetch --all', { cwd }).err)                return res.send(500);
 		if(await childProcess.exec('git reset --hard origin/master', { cwd }).err) return res.send(500);
 		if(await childProcess.exec('git pull origin master', { cwd }).err)         return res.send(500);
-
-		// Return ok
-		res.send(200);
 	}
+
+	// Return ok
+	res.send(200);
 });
 
 // Set port
