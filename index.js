@@ -10,7 +10,7 @@ const
 ;
 
 // Function after pull
-function after()
+async function after()
 {
 }
 
@@ -61,7 +61,7 @@ app.post('/', async function(req, res)
 
 		log('Branch updated !');
 
-		after();
+		await after();
 
 		log('After Success !');
 	}
