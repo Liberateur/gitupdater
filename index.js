@@ -1,8 +1,6 @@
-// Get modules
-const fs           = require('fs');
-const express      = require('express');
-const childProcess = require('child_process');
-const bodyParser   = require('body-parser');
+// ======================
+// CONFIGURATION
+// ======================
 
 // Set paths
 const
@@ -10,6 +8,23 @@ const
 	cwd    = __dirname + '/../change/this/path/',
 	logs   = __dirname + '/logs.txt'
 ;
+
+// Function after pull
+function after()
+{
+}
+
+
+
+// ======================
+// APP
+// ======================
+
+// Get modules
+const fs           = require('fs');
+const express      = require('express');
+const childProcess = require('child_process');
+const bodyParser   = require('body-parser');
 
 // Init logs
 if(!fs.existsSync(logs)) fs.writeFileSync(logs, '');
@@ -25,8 +40,11 @@ var inupdate = false;
 // Main route
 app.post('/', async function(req, res)
 {
+	// Send receipt
+	res.send(200);
+
 	// Prevent double call
-	if(inupdate) return ended();
+	if(inupdate) return;
 	inupdate = true;
 
 	// If branch staging push
@@ -36,27 +54,18 @@ app.post('/', async function(req, res)
 
 		// Force update repo
 		var e = await childProcess.exec('git fetch --all', { cwd }).err;
-		if(e) return log('Fail !\n' + JSON.strinigfy(e)), ended(e);
+		if(e) return log('Fail !\n' + JSON.strinigfy(e)), inupdate = false;
 
 		var e = await childProcess.exec('git reset --hard origin/' + branch, { cwd }).err;
-		if(e) return log('Fail !\n' + JSON.strinigfy(e)), ended(e);
+		if(e) return log('Fail !\n' + JSON.strinigfy(e)), inupdate = false;
 
 		log('Branch updated !');
+
+		after();
+
+		log('After Success !');
 	}
-
-	// Return ok
-	ended();
 });
-
-// Function update status
-function ended(erreur)
-{
-	// Update status
-	inupdate = false;
-
-	// Return response
-	return res.send(erreur ? 500 : 200);
-}
 
 // Save log
 function log(msg)
