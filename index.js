@@ -25,48 +25,73 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Init status
-var inupdate = false;
+// Init status (prevent double call)
+var inupdate;
 
 // Main route
 app.post('/', async function(req, res)
 {
-	// Send receipt
-	res.send(200);
-
 	// Prevent double call
-	if(inupdate) return;
+	if(inupdate) return setTimeout(() => { update(req, res); }, 1000);
+
+	// Wait update
+	await update(req, res);
+});
+
+// Set application port
+app.listen(4242);
+
+
+
+// ======================
+// FUNCTION
+// ======================
+
+// Update function
+async function update()
+{
+	// Set in update
 	inupdate = true;
 
-	// If branch staging push
-	if(config.branch && req.body.ref.indexOf(config.branch) != -1)
+	// Init fail
+	let fail;
+
+	// If branch push
+	if(!config.branch || req.body.ref.indexOf(config.branch) != -1)
 	{
-		log('Update branch ' + config.branch + '...');
+		// Save log update...
+		log('Update branch "' + (config.branch||'all') + '"...');
 
-		// Force update repo
-		var e = await childProcess.exec('git fetch --all', { cwd:config.cwd }).err;
-		if(e) return log('Fail !\n' + JSON.strinigfy(e)), inupdate = false;
+		// Fetch all
+		var fail = await childProcess.exec('git fetch --all', { cwd:config.cwd }).err;
+		if(fail) { log('Fail !\n' + JSON.strinigfy(e)); }
 
-		var e = await childProcess.exec('git reset --hard origin/' + config.branch, { cwd:config.cwd }).err;
-		if(e) return log('Fail !\n' + JSON.strinigfy(e)), inupdate = false;
+		// Force reset repo
+		var fail = await childProcess.exec('git reset --hard origin/' + config.branch, { cwd:config.cwd }).err;
+		if(fail) { log('Fail !\n' + JSON.strinigfy(e)); }
 
+		// Save log updated
 		log('Branch updated !');
 
 		// Execute after js
-		await (config.after||function(){})();
+		if(!fail) await (config.after||function(){})();
 
+		// Save log success
 		log('After Success !');
 	}
-});
 
-// Save log
+	// Clear in update 
+	inupdate = false;
+
+	// Send success
+	res.send(200);
+}
+
+// Save log function
 function log(msg)
 {
 	fs.appendFileSync(config.logs, '\n[' + (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + (new Date()).getFullYear() + ' ' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':' + (new Date()).getSeconds() + '] ' + msg);
 }
-
-// Set port
-app.listen(4242);
 
 
 
