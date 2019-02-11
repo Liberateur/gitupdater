@@ -48,7 +48,7 @@ app.listen(4242);
 // ======================
 
 // Update function
-async function update()
+async function update(req,res)
 {
 	// Set in update
 	inupdate = true;
@@ -57,18 +57,28 @@ async function update()
 	let fail;
 
 	// If branch push
-	if(!config.branch || req.body.ref.indexOf(config.branch) != -1)
+	if(!config.branch || (req.body && req.body.ref && req.body.ref.indexOf(config.branch) != -1))
 	{
 		// Save log update...
 		log('Update branch "' + (config.branch||'all') + '"...');
 
 		// Fetch all
-		var fail = await childProcess.exec('git fetch --all', { cwd:config.cwd }).err;
+		fail = await childProcess.exec('git fetch --all', { cwd:config.cwd }).err;
 		if(fail) { log('Fail !\n' + JSON.strinigfy(e)); }
 
 		// Force reset repo
-		var fail = await childProcess.exec('git reset --hard origin/' + config.branch, { cwd:config.cwd }).err;
+		fail = await childProcess.exec('git reset --hard origin/' + config.branch, { cwd:config.cwd }).err;
 		if(fail) { log('Fail !\n' + JSON.strinigfy(e)); }
+
+		// Prevent fail
+		if(fail)
+		{
+			// Add log
+			log('FAIL :\n' + fail);
+
+			// Return fail
+			return res.status(500).send(fail);
+		}
 
 		// Save log updated
 		log('Branch updated !');
@@ -84,7 +94,7 @@ async function update()
 	inupdate = false;
 
 	// Send success
-	res.send(200);
+	res.status(200).send('SUCCESS !');
 }
 
 // Save log function
