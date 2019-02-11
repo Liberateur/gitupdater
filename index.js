@@ -76,6 +76,9 @@ async function update(req,res)
 			// Add log
 			log('FAIL :\n' + fail);
 
+			// Clear in update
+			inupdate = false;
+
 			// Return fail
 			return res.status(500).send(fail);
 		}
