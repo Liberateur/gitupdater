@@ -7,8 +7,6 @@ sudo apt-get install git -y
 
 # Config
 
-## Config file
-
 You need to create the `config.js` file on the example of `config.sample.js`.
 
 ## Config params
