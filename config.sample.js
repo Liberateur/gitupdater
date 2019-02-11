@@ -5,16 +5,16 @@ const childProcess = require('child_process');
 var config = {};
 
 // Name of the branch that triggers the update or false if all
-config.branch: 'master',
+config.branch = 'master';
 
 // Path to the repo
-config.cwd: __dirname + '/../change/this/path/',
+config.cwd = __dirname + '/../change/this/path/';
 
 // Log file path
-config.logs: __dirname + '/logs.txt',
+config.logs = __dirname + '/logs.txt';
 
 // Function async after execute update or false
-config.after: async function()
+config.after = async function()
 {
 	// Execute scripts
 	await childProcess.exec('node scripts/datas',      { cwd:config.cwd });
