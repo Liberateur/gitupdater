@@ -92,7 +92,7 @@ async function update(req,res)
 	else
 	{
 		// Add logs
-		log(JSON.stringify(req.body,null,2));
+		console.log(req.body);
 	}
 
 	// Clear in update 
