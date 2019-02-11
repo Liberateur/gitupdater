@@ -2,17 +2,8 @@
 // CONFIGURATION
 // ======================
 
-// Set paths
-const
-	branch = 'master',
-	cwd    = __dirname + '/../change/this/path/',
-	logs   = __dirname + '/logs.txt'
-;
-
-// Function after pull
-async function after()
-{
-}
+// Get config
+const config = require('./config.js');
 
 
 
@@ -26,8 +17,8 @@ const express      = require('express');
 const childProcess = require('child_process');
 const bodyParser   = require('body-parser');
 
-// Init logs
-if(!fs.existsSync(logs)) fs.writeFileSync(logs, '');
+// Init log file
+if(!fs.existsSync(config.logs)) fs.writeFileSync(config.logs, '');
 
 // Create serveur
 var app = express();
@@ -48,20 +39,21 @@ app.post('/', async function(req, res)
 	inupdate = true;
 
 	// If branch staging push
-	if(req.body.ref.indexOf(branch) != -1)
+	if(config.branch && req.body.ref.indexOf(config.branch) != -1)
 	{
-		log('Update branch ' + branch + '...');
+		log('Update branch ' + config.branch + '...');
 
 		// Force update repo
-		var e = await childProcess.exec('git fetch --all', { cwd }).err;
+		var e = await childProcess.exec('git fetch --all', { cwd:config.cwd }).err;
 		if(e) return log('Fail !\n' + JSON.strinigfy(e)), inupdate = false;
 
-		var e = await childProcess.exec('git reset --hard origin/' + branch, { cwd }).err;
+		var e = await childProcess.exec('git reset --hard origin/' + config.branch, { cwd:config.cwd }).err;
 		if(e) return log('Fail !\n' + JSON.strinigfy(e)), inupdate = false;
 
 		log('Branch updated !');
 
-		await after();
+		// Execute after js
+		await (config.after||function(){})();
 
 		log('After Success !');
 	}
@@ -70,7 +62,7 @@ app.post('/', async function(req, res)
 // Save log
 function log(msg)
 {
-	fs.appendFileSync(logs, '\n[' + (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + (new Date()).getFullYear() + ' ' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':' + (new Date()).getSeconds() + '] ' + msg);
+	fs.appendFileSync(config.logs, '\n[' + (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + (new Date()).getFullYear() + ' ' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':' + (new Date()).getSeconds() + '] ' + msg);
 }
 
 // Set port
