@@ -89,6 +89,11 @@ async function update(req,res)
 		// Save log success
 		log('After Success !');
 	}
+	else
+	{
+		// Add logs
+		log(req.body);
+	}
 
 	// Clear in update 
 	inupdate = false;
