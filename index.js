@@ -70,7 +70,7 @@ app.post('/', async function(req, res)
 // Save log
 function log(msg)
 {
-	fs.appendFileSync(logs, '[' + (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + (new Date()).getFullYear() + ' ' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':' + (new Date()).getSeconds() + '] ' + msg);
+	fs.appendFileSync(logs, '\n[' + (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + (new Date()).getFullYear() + ' ' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':' + (new Date()).getSeconds() + '] ' + msg);
 }
 
 // Set port
